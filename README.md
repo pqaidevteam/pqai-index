@@ -22,8 +22,10 @@ To make a contribution, please follow these steps:
 
 1. Fork this repository.
 2. Create a new branch with a descriptive name
+3. Make copy of env file as .env and docker-compose.dev.yml as docker-compose.yml
+3. Bring indexer to life `docker-compose up`
 3. Make the changes you want and add new tests, if needed
-4. Make sure all tests are passing
+4. Make sure all tests are passing `docker exec -i dev_pqai_indexer_api python -m unittest discover ./tests/`
 5. Commit your changes
 6. Submit a pull request
 

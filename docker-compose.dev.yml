@@ -1,0 +1,17 @@
+version: '3'
+
+services:
+  pqai_indexer_api:
+    container_name: dev_pqai_indexer_api
+    build: .
+    command: bash -c "pip install --no-cache-dir --upgrade -r /code/requirements.txt && uvicorn main:app --host 0.0.0.0 --port 80 --reload"
+    restart: always
+    ports: 
+      - 8001:80
+    volumes:
+      - ./:/code
+    environment:
+      - PORT=${PORT}
+      - INDEXES_DIR=${INDEXES_DIR}
+      - USE_FAISS_INDEXES=${USE_FAISS_INDEXES}
+      - USE_ANNOY_INDEXES=${USE_ANNOY_INDEXES}
