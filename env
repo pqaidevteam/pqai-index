@@ -1,4 +1,4 @@
 INDEXES_DIR=tests/test_indexes # Remember to change the location
-PORT=80
+PORT=8888
 USE_FAISS_INDEXES=0
 USE_ANNOY_INDEXES=1
