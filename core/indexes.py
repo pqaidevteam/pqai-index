@@ -6,13 +6,16 @@ Attributes:
     USE_FAISS_INDEXES (1/0): Whether FAISS indexes should be read or ignored
 """
 
-import numpy as np
-import annoy
+import os
 import json
 from abc import ABC, abstractmethod
-import os
+import dotenv
+import numpy as np
+import annoy
 import faiss
 import psutil
+
+dotenv.load_dotenv()
 
 CHECK_MARK = "\u2713"
 USE_FAISS_INDEXES = os.environ["USE_FAISS_INDEXES"]
@@ -21,36 +24,31 @@ USE_ANNOY_INDEXES = os.environ["USE_ANNOY_INDEXES"]
 
 class Index(ABC):
 
-    """An abstract index class
-    """
+    """An abstract index class"""
 
     @abstractmethod
     def search(self, query, n):
-        """Return closest matches to a query
-        """
+        """Return closest matches to a query"""
         raise NotImplementedError
 
 
 class VectorIndex(Index):
 
-    """An abstract class for an index that stores vectors
-    """
+    """An abstract class for an index that stores vectors"""
 
     @abstractmethod
     def search(self, qvec, n):
-        """Return mostly similar `n` vectors to query vector `qvec`
-        """
+        """Return mostly similar `n` vectors to query vector `qvec`"""
         raise NotImplementedError
 
 
 class AnnoyIndexReader:
 
-    """Loads an Annoy index by reading its `.ann` and `.json` files
-    """
+    """Loads an Annoy index by reading its `.ann` and `.json` files"""
 
     def __init__(self, dims: int, metric: str):
         """Initialize
-        
+
         Args:
             dims: Dimension of stored vectors, e.g., 32
             metric: Distance metric, e.g., 'cosine'
@@ -64,7 +62,7 @@ class AnnoyIndexReader:
             ann_file (path): Annoy index file
             json_file (path): JSON file containing labels for index vectors
             name (str, optional): Index's name
-        
+
         Returns:
             annoy.AnnoyIndex: Index
         """
@@ -74,15 +72,13 @@ class AnnoyIndexReader:
         return AnnoyIndex(index, item_resolver, name)
 
     def _read_ann(self, ann_file):
-        """Load index file
-        """
+        """Load index file"""
         index = annoy.AnnoyIndex(self._dims, self._metric)
         index.load(ann_file)
         return index
 
     def _get_items_from_json(self, json_file):
-        """Read labels
-        """
+        """Read labels"""
         with open(json_file) as file:
             items = json.load(file)
         return items
@@ -90,12 +86,11 @@ class AnnoyIndexReader:
 
 class AnnoyIndex(VectorIndex):
 
-    """A wrapper around an AnnoyIndex object
-    """
+    """A wrapper around an AnnoyIndex object"""
 
     def __init__(self, index: annoy.AnnoyIndex, resolver_fn, name=None):
         """Initialize
-        
+
         Args:
             index (annoy.AnnoyIndex): Vector index
             resolver_fn (method): Method that returns label for an item id
@@ -108,11 +103,11 @@ class AnnoyIndex(VectorIndex):
 
     def search(self, qvec, n):
         """Return `n` most similar items to the given query vector
-        
+
         Args:
             qvec (list): Query vector
             n (int): No. of items to return
-        
+
         Returns:
             list: An array of (label, distance) pairs
         """
@@ -123,7 +118,7 @@ class AnnoyIndex(VectorIndex):
 
     def set_search_depth(self, d):
         """Set search depth, higher value = more thorough (slower) search
-        
+
         Args:
             d (int): Search depth
         """
@@ -131,7 +126,7 @@ class AnnoyIndex(VectorIndex):
 
     def count(self):
         """Return the number of items (vectors) in the index
-        
+
         Returns:
             int: No. of items in the index
         """
@@ -139,7 +134,7 @@ class AnnoyIndex(VectorIndex):
 
     def dims(self):
         """Return the dimensionality of vectors present in the index
-        
+
         Returns:
             int: Dimension count
         """
@@ -147,8 +142,7 @@ class AnnoyIndex(VectorIndex):
         return len(v0)
 
     def __repr__(self):
-        """String representation
-        """
+        """String representation"""
         idx_type = "AnnoyIndex "
         idx_name = "Unnamed" if self._name is None else self._name
         idx_info = f" [{self.count()} vectors, {self.dims()} dimensions]"
@@ -158,7 +152,7 @@ class AnnoyIndex(VectorIndex):
     @property
     def name(self):
         """Return name of the index
-        
+
         Returns:
             str: Index's name
         """
@@ -167,17 +161,16 @@ class AnnoyIndex(VectorIndex):
 
 class FaissIndexReader:
 
-    """Reads Faiss index and associated labels from disk
-    """
+    """Reads Faiss index and associated labels from disk"""
 
     def read_from_files(self, index_file, json_file, name=None):
         """Read index from a `.faiss` and a `.json` file
-        
+
         Args:
             index_file (path): Vector index file
             json_file (path): JSON file containing vector labels
             name (str, optional): Identifier of index
-        
+
         Returns:
             FaissIndex: Index object
         """
@@ -187,8 +180,7 @@ class FaissIndexReader:
         return FaissIndex(index, item_resolver, name)
 
     def _get_items_from_json(self, json_file):
-        """Read labels from json file
-        """
+        """Read labels from json file"""
         with open(json_file) as fp:
             items = json.load(fp)
         return items
@@ -196,12 +188,11 @@ class FaissIndexReader:
 
 class FaissIndex(VectorIndex):
 
-    """A wrapper around an FAISS index
-    """
+    """A wrapper around an FAISS index"""
 
     def __init__(self, index, resolver_fn, name=None):
         """Initialize
-        
+
         Args:
             index (FAISS index object): Index
             resolver_fn (method): Method that returns label for an item id
@@ -215,11 +206,11 @@ class FaissIndex(VectorIndex):
 
     def search(self, qvec, n):
         """Return `n` most similar items to the given query vector
-        
+
         Args:
             qvec (list): Query vector
             n (int): No. of items to return
-        
+
         Returns:
             list: An array of (label, distance) pairs
         """
@@ -229,10 +220,10 @@ class FaissIndex(VectorIndex):
         dists = [float(d) for d in ds[0]]
         return list(zip(items, dists))
 
-    # TODO: Move this to indexer
+    # Move this to indexer
     def add_vectors(self, vectors, labels):
         """Add new vector to an index
-        
+
         Args:
             vectors (list): Vectors to be added
             labels (list): Labels corresponding to the vectors
@@ -246,23 +237,20 @@ class FaissIndex(VectorIndex):
         self._save()
 
     def _init(self, X):
-        """Train the index on given vectors
-        """
+        """Train the index on given vectors"""
         self._dims = X.shape[1]
         self._labels = []
         self._index = faiss.index_factory(self._dims, "OPQ16_64,HNSW32")
         self._index.train(X)
 
     def _preprocess(self, vectors):
-        """Normalize vectors
-        """
+        """Normalize vectors"""
         X = np.array(vectors).astype("float32")
         faiss.normalize_L2(X)
         return X
 
     def _save(self):
-        """Save the index to disk
-        """
+        """Save the index to disk"""
         index_file = f"{self._index_dir}/{self._id}.faiss"
         labels_file = f"{self._index_dir}/{self._id}.labels.json"
         faiss.write_index(self._index, index_file)
@@ -272,7 +260,7 @@ class FaissIndex(VectorIndex):
     @property
     def name(self):
         """Get the index's name
-        
+
         Returns:
             str: Name of the index
         """
@@ -282,7 +270,7 @@ class FaissIndex(VectorIndex):
 class IndexesDirectory:
 
     """A collection of indexes read from a directory
-    
+
     Attributes:
         cache (dict): In-memory store of indexes loaded from the disk
         dims (int): Dimensionality of the vectors
@@ -295,7 +283,7 @@ class IndexesDirectory:
 
     def __init__(self, folder):
         """Initialize
-        
+
         Args:
             folder (path): Directory path where indexes are stored
         """
@@ -304,7 +292,7 @@ class IndexesDirectory:
 
     def _discover_indexes(self):
         """Scan the directory to find indexes
-        
+
         Returns:
             set: A set of index identifiers (names)
         """
@@ -319,10 +307,10 @@ class IndexesDirectory:
 
     def get(self, index_id):
         """Get an index by name
-        
+
         Args:
             index_id (str): Index's name (or part thereof, i.e. prefix)
-        
+
         Returns:
             list: An array of indexes matching `index_id`
         """
@@ -331,15 +319,13 @@ class IndexesDirectory:
         return indexes
 
     def _get_one_index(self, index_id):
-        """Get one index by name (either from cache or disk)
-        """
+        """Get one index by name (either from cache or disk)"""
         if index_id in self.cache:
             return self.cache.get(index_id)
         return self._get_from_disk(index_id)
 
     def _get_from_disk(self, index_id):
-        """Load an index from disk
-        """
+        """Load an index from disk"""
         print(f"Loading vector index: {index_id}")
         index_file = self._get_index_file_path(index_id)
         json_file = f"{self._folder}/{index_id}.items.json"
@@ -355,20 +341,18 @@ class IndexesDirectory:
         return index
 
     def _get_index_file_path(self, index_id):
-        """Get full paths to index file
-        """
+        """Get full paths to index file"""
         ann_file = f"{self._folder}/{index_id}.ann"
         faiss_file = f"{self._folder}/{index_id}.faiss"
         return faiss_file if (os.path.exists(faiss_file)) else ann_file
 
     def _cache_index(self, index_id, index):
-        """Store the index in cache
-        """
+        """Store the index in cache"""
         self.cache[index_id] = index
 
     def available(self):
         """Get a list of index names available in the directory
-        
+
         Returns:
             list: Index names
         """

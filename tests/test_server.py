@@ -12,9 +12,9 @@ import json
 import re
 import socket
 from pathlib import Path
+import requests
 import numpy as np
 import dotenv
-import requests
 
 dotenv_file = str((Path(__file__).parent.parent / ".env").resolve())
 dotenv.load_dotenv(dotenv_file)
@@ -33,12 +33,10 @@ if server_not_running:
 @unittest.skipIf(server_not_running, "Works only when true")
 class TestAPI(unittest.TestCase):
 
-    """Check if all API routes are working as expected
-    """
+    """Check if all API routes are working as expected"""
 
     def test_can_search(self):
-        """Check if a valid response is returned for a legit request
-        """
+        """Check if a valid response is returned for a legit request"""
         params = {
             "mode": "vector",
             "query": json.dumps(list(np.random.random(768))),
@@ -59,8 +57,7 @@ class TestAPI(unittest.TestCase):
         self.assertTrue(all([isinstance(score, float) for _, score in results]))
 
     def test_invalid_mode_in_request(self):
-        """Make sure HTTP 400 is returned when search mode is invalid
-        """
+        """Make sure HTTP 400 is returned when search mode is invalid"""
         params = {
             "mode": "invalid_mode",
             "query": json.dumps(list(np.random.random(768))),
@@ -81,11 +78,11 @@ class TestAPI(unittest.TestCase):
 
     def call_route(self, route, params):
         """Make a request to given route with given parameters
-        
+
         Args:
             route (str): Route, e.g. '/search'
             params (dict): Query string parameters
-        
+
         Returns:
             requests.models.Response: Response against HTTP request
         """

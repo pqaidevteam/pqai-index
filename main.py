@@ -1,18 +1,25 @@
+"""Server
+Attributes:
+    app (fastapi.applications.FastAPI): FastAPI instance
+    PORT (int): Port number
+"""
+
 import os
 import json
 import dotenv
 import uvicorn
 from uvicorn.config import LOGGING_CONFIG
 from fastapi import FastAPI, HTTPException
+
+# pylint: disable=C0411
+from core import indexes
 from operator import add
 from functools import reduce
 
-logging_format = "%(levelprefix)s %(client_addr)s %(status_code)s"
-LOGGING_CONFIG["formatters"]["access"]["fmt"] = logging_format
+LOGGING_FORMAT = "%(levelprefix)s %(client_addr)s %(status_code)s"
+LOGGING_CONFIG["formatters"]["access"]["fmt"] = LOGGING_FORMAT
 
 dotenv.load_dotenv()
-
-from core import indexes
 
 INDEXES_FOLDER = os.environ["INDEXES_DIR"]
 assert os.path.isdir(INDEXES_FOLDER)
@@ -23,14 +30,18 @@ app = FastAPI()
 
 
 @app.get("/search")
+
+# pylint: disable=C0103
 async def search(mode: str, query: str, n: int):
+    """Converts the query into vector and returns top n similar indexes"""
+
     if mode == "vector":
         try:
             qvec = json.loads(query)
             results = reduce(add, [idx.search(qvec, n) for idx in INDEXES])
             results.sort(key=lambda r: r[1])
             return {"query": qvec, "results": results[:n]}
-        except json.JSONDecodeError as e:
+        except json.JSONDecodeError:
             raise HTTPException(status_code=400, detail="Invalid JSON query")
     else:
         raise HTTPException(status_code=400, detail="Invalid search mode")
@@ -38,4 +49,4 @@ async def search(mode: str, query: str, n: int):
 
 if __name__ == "__main__":
     port = int(os.environ["PORT"])
-    uvicorn.run("main:app", host="127.0.0.1", port=port, reload=True)
+    uvicorn.run("main:app", host="127.0.0.1", port=port, reload=False)
