@@ -13,9 +13,13 @@ os.environ["INDEXES_DIRECTORY"] = test_index_dir
 os.environ["USE_FAISS_INDEXES"] = "1"
 os.environ["USE_ANNOY_INDEXES"] = "1"
 
-from core.indexes import IndexesDirectory
-from core.indexes import AnnoyIndexReader, AnnoyIndex, FaissIndexReader, FaissIndex
-
+from core.indexes import (
+    AnnoyIndexReader,
+    AnnoyIndex,
+    FaissIndexReader,
+    FaissIndex
+)
+from core.storage import IndexStorage
 
 class TestAnnoyIndexReader(unittest.TestCase):
     def test_read_annoy_index(self):
@@ -77,11 +81,11 @@ class TestFaissIndexClass(unittest.TestCase):
         self.assertEqual(n_results, len(results))
 
 
-class TestIndexesDirectory(unittest.TestCase):
+class TestIndexStorage(unittest.TestCase):
     def setUp(self):
         """ The setUp function is called by the test framework at the beginning of each test.  It creates a new instance of your application.
         """
-        self.indexes = IndexesDirectory(f"{test_index_dir}")
+        self.indexes = IndexStorage(f"{test_index_dir}")
 
     def test_get_annoy_indexes(self):
         """Can it discover AnnoyIndexes on disk?
