@@ -32,7 +32,7 @@ class FaissIndex(VectorIndex):
 
     def __init__(self, index, resolver_fn, name=None):
         """Initialize
-        
+
         Args:
             index (FAISS index object): Index
             resolver_fn (method): Method that returns label for an item id
@@ -46,11 +46,11 @@ class FaissIndex(VectorIndex):
 
     def search(self, qvec, n):
         """Return `n` most similar items to the given query vector
-        
+
         Args:
             qvec (list): Query vector
             n (int): No. of items to return
-        
+
         Returns:
             list: An array of (label, distance) pairs
         """
@@ -63,7 +63,7 @@ class FaissIndex(VectorIndex):
     # TODO: Move this to indexer
     def add_vectors(self, vectors, labels):
         """Add new vector to an index
-        
+
         Args:
             vectors (list): Vectors to be added
             labels (list): Labels corresponding to the vectors
@@ -91,6 +91,7 @@ class FaissIndex(VectorIndex):
         faiss.normalize_L2(X)
         return X
 
+
     def _save(self):
         """Save the index to disk
         """
@@ -103,7 +104,7 @@ class FaissIndex(VectorIndex):
     @property
     def name(self):
         """Get the index's name
-        
+
         Returns:
             str: Name of the index
         """
@@ -112,17 +113,16 @@ class FaissIndex(VectorIndex):
 
 class FaissIndexReader:
 
-    """Reads Faiss index and associated labels from disk
-    """
+    """Reads Faiss index and associated labels from disk"""
 
     def read_from_files(self, index_file, json_file, name=None):
         """Read index from a `.faiss` and a `.json` file
-        
+
         Args:
             index_file (path): Vector index file
             json_file (path): JSON file containing vector labels
             name (str, optional): Identifier of index
-        
+
         Returns:
             FaissIndex: Index object
         """
@@ -132,8 +132,7 @@ class FaissIndexReader:
         return FaissIndex(index, item_resolver, name)
 
     def _get_items_from_json(self, json_file):
-        """Read labels from json file
-        """
+        """Read labels from json file"""
         with open(json_file) as fp:
             items = json.load(fp)
         return items
@@ -146,7 +145,7 @@ class AnnoyIndex(VectorIndex):
 
     def __init__(self, index: annoy.AnnoyIndex, resolver_fn, name=None):
         """Initialize
-        
+
         Args:
             index (annoy.AnnoyIndex): Vector index
             resolver_fn (method): Method that returns label for an item id
@@ -159,11 +158,11 @@ class AnnoyIndex(VectorIndex):
 
     def search(self, qvec, n):
         """Return `n` most similar items to the given query vector
-        
+
         Args:
             qvec (list): Query vector
             n (int): No. of items to return
-        
+
         Returns:
             list: An array of (label, distance) pairs
         """
@@ -223,7 +222,7 @@ class AnnoyIndexReader:
 
     def __init__(self, dims: int, metric: str):
         """Initialize
-        
+
         Args:
             dims: Dimension of stored vectors, e.g., 32
             metric: Distance metric, e.g., 'cosine'
@@ -259,4 +258,3 @@ class AnnoyIndexReader:
         with open(json_file) as file:
             items = json.load(file)
         return items
-
