@@ -54,60 +54,16 @@ class FaissIndex(VectorIndex):
         Returns:
             list: An array of (label, distance) pairs
         """
-        Q = self._preprocess([qvec])
+        Q = np.array([qvec]).astype("float32")
+        faiss.normalize_L2(Q)
         ds, ns = self._index.search(Q, n)
         items = [self._index2label(i) for i in ns[0]]
         dists = [float(d) for d in ds[0]]
         return list(zip(items, dists))
 
-    # TODO: Move this to indexer
-    def add_vectors(self, vectors, labels):
-        """Add new vector to an index
-
-        Args:
-            vectors (list): Vectors to be added
-            labels (list): Labels corresponding to the vectors
-        """
-        assert len(vectors) == len(labels)
-        X = self._preprocess(vectors)
-        if self._index is None:
-            self._init(X)
-        self._index.add(X)
-        self._labels += labels
-        self._save()
-
-    def _init(self, X):
-        """Train the index on given vectors
-        """
-        self._dims = X.shape[1]
-        self._labels = []
-        self._index = faiss.index_factory(self._dims, "OPQ16_64,HNSW32")
-        self._index.train(X)
-
-    def _preprocess(self, vectors):
-        """Normalize vectors
-        """
-        X = np.array(vectors).astype("float32")
-        faiss.normalize_L2(X)
-        return X
-
-
-    def _save(self):
-        """Save the index to disk
-        """
-        index_file = f"{self._index_dir}/{self._id}.faiss"
-        labels_file = f"{self._index_dir}/{self._id}.labels.json"
-        faiss.write_index(self._index, index_file)
-        with open(labels_file, "w") as fp:
-            json.dump(self._labels, fp)
-
     @property
     def name(self):
-        """Get the index's name
-
-        Returns:
-            str: Name of the index
-        """
+        """Get the index's name"""
         return self._id
 
 
