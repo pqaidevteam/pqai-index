@@ -11,19 +11,21 @@ import uvicorn
 from uvicorn.config import LOGGING_CONFIG
 from fastapi import FastAPI, HTTPException
 
+dotenv.load_dotenv()
+
 # pylint: disable=C0411
-from core import indexes
+from core.storage import IndexStorage
 from operator import add
 from functools import reduce
 
 LOGGING_FORMAT = "%(levelprefix)s %(client_addr)s %(status_code)s"
 LOGGING_CONFIG["formatters"]["access"]["fmt"] = LOGGING_FORMAT
 
-dotenv.load_dotenv()
+
 
 INDEXES_FOLDER = os.environ["INDEXES_DIR"]
 assert os.path.isdir(INDEXES_FOLDER)
-INDEX_DIR = indexes.IndexesDirectory(INDEXES_FOLDER)
+INDEX_DIR = IndexStorage(INDEXES_FOLDER)
 INDEXES = reduce(add, [INDEX_DIR.get(name) for name in INDEX_DIR.available()])
 
 app = FastAPI()
