@@ -1,3 +1,6 @@
+"""
+Class to store index
+"""
 import os
 from core.indexes import FaissIndexReader, AnnoyIndexReader
 import psutil

@@ -6,9 +6,8 @@ Attributes:
     USE_FAISS_INDEXES (1/0): Whether FAISS indexes should be read or ignored
 """
 
-import os
 import json
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import numpy as np
 import faiss
 import annoy
