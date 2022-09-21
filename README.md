@@ -18,6 +18,22 @@ Indexes are searched by passing in a query vector. A list of most similar vector
 | ------ | --------- | --------------------------------------------- |
 | `GET`  | `/search` | Search for similar items using a query vector |
 
+## How to run?
+
+### From command line
+
+1. Clone this repository
+1. Create a `.env` file using `/env` template and set environment variable values
+1. Create a virtual environment and install dependencies: `pip install -r requirements.txt`
+1. Run the service: `python3 main.py`
+
+### As docker container
+
+1. Install Docker in your system.
+2. Clone this repository
+3. Create a `.env` file using `/env` template and set environment variable values
+5. Then run the command: `sudo docker compose up`
+
 ## License
 
 The project is open-source under the MIT license.
@@ -30,12 +46,10 @@ To make a contribution, please follow these steps:
 
 1. Fork this repository.
 2. Create a new branch with a descriptive name
-3. Make copy of env file as .env and docker-compose.dev.yml as docker-compose.yml
-4. Bring indexer to life `docker-compose up`
-5. Make the changes you want and add new tests, if needed
-6. Make sure all tests are passing `docker exec -i dev_pqai_indexer_api python -m unittest discover ./tests/`
-7. Commit your changes
-8. Submit a pull request
+3. Make the changes you want and add new tests, if needed
+4. Make sure all tests are passing
+5. Commit your changes
+6. Submit a pull request
 
 ## Support
 

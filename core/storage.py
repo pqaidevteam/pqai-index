@@ -1,3 +1,6 @@
+"""
+Class to store index
+"""
 import os
 from core.indexes import FaissIndexReader, AnnoyIndexReader
 import psutil
@@ -6,10 +9,11 @@ CHECK_MARK = "\u2713"
 USE_FAISS_INDEXES = os.environ["USE_FAISS_INDEXES"]
 USE_ANNOY_INDEXES = os.environ["USE_ANNOY_INDEXES"]
 
+
 class IndexStorage:
 
     """A collection of indexes read from a directory
-    
+
     Attributes:
         cache (dict): In-memory store of indexes loaded from the disk
         dims (int): Dimensionality of the vectors
@@ -22,7 +26,7 @@ class IndexStorage:
 
     def __init__(self, folder):
         """Initialize
-        
+
         Args:
             folder (path): Directory path where indexes are stored
         """
@@ -31,7 +35,7 @@ class IndexStorage:
 
     def _discover_indexes(self):
         """Scan the directory to find indexes
-        
+
         Returns:
             set: A set of index identifiers (names)
         """
@@ -46,10 +50,10 @@ class IndexStorage:
 
     def get(self, index_id):
         """Get an index by name
-        
+
         Args:
             index_id (str): Index's name (or part thereof, i.e. prefix)
-        
+
         Returns:
             list: An array of indexes matching `index_id`
         """
@@ -58,15 +62,13 @@ class IndexStorage:
         return indexes
 
     def _get_one_index(self, index_id):
-        """Get one index by name (either from cache or disk)
-        """
+        """Get one index by name (either from cache or disk)"""
         if index_id in self.cache:
             return self.cache.get(index_id)
         return self._get_from_disk(index_id)
 
     def _get_from_disk(self, index_id):
-        """Load an index from disk
-        """
+        """Load an index from disk"""
         print(f"Loading vector index: {index_id}")
         index_file = self._get_index_file_path(index_id)
         json_file = f"{self._folder}/{index_id}.items.json"
@@ -82,20 +84,18 @@ class IndexStorage:
         return index
 
     def _get_index_file_path(self, index_id):
-        """Get full paths to index file
-        """
+        """Get full paths to index file"""
         ann_file = f"{self._folder}/{index_id}.ann"
         faiss_file = f"{self._folder}/{index_id}.faiss"
         return faiss_file if (os.path.exists(faiss_file)) else ann_file
 
     def _cache_index(self, index_id, index):
-        """Store the index in cache
-        """
+        """Store the index in cache"""
         self.cache[index_id] = index
 
     def available(self):
         """Get a list of index names available in the directory
-        
+
         Returns:
             list: Index names
         """

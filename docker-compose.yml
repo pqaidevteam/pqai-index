@@ -4,7 +4,7 @@ services:
   pqai_indexer_api:
     container_name: dev_pqai_indexer
     build: .
-    command: bash -c "pip install --no-cache-dir --upgrade -r /app/requirements.txt && uvicorn main:app --host 0.0.0.0 --port 80 --reload"
+    command: bash -c "pip install --no-cache-dir --upgrade -r /app/requirements.txt && uvicorn main:app --host 0.0.0.0 --port 80"
     restart: always
     ports: 
       - ${PORT}:80

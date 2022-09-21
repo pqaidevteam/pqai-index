@@ -6,29 +6,26 @@ Attributes:
     USE_FAISS_INDEXES (1/0): Whether FAISS indexes should be read or ignored
 """
 
-import os
 import json
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 import numpy as np
 import faiss
 import annoy
 
 
-class VectorIndex():
+class VectorIndex:
 
     """Abstract class for indexes that stores vectors"""
 
     @abstractmethod
     def search(self, qvec: np.ndarray, n: int):
-        """Return mostly similar `n` vectors to query vector `qvec`
-        """
+        """Return mostly similar `n` vectors to query vector `qvec`"""
         raise NotImplementedError
 
 
 class FaissIndex(VectorIndex):
 
-    """A wrapper around an FAISS index
-    """
+    """A wrapper around an FAISS index"""
 
     def __init__(self, index, resolver_fn, name=None):
         """Initialize
@@ -96,8 +93,7 @@ class FaissIndexReader:
 
 class AnnoyIndex(VectorIndex):
 
-    """A wrapper around an AnnoyIndex object
-    """
+    """A wrapper around an AnnoyIndex object"""
 
     def __init__(self, index: annoy.AnnoyIndex, resolver_fn, name=None):
         """Initialize
@@ -129,7 +125,7 @@ class AnnoyIndex(VectorIndex):
 
     def set_search_depth(self, d):
         """Set search depth, higher value = more thorough (slower) search
-        
+
         Args:
             d (int): Search depth
         """
@@ -137,7 +133,7 @@ class AnnoyIndex(VectorIndex):
 
     def count(self):
         """Return the number of items (vectors) in the index
-        
+
         Returns:
             int: No. of items in the index
         """
@@ -145,7 +141,7 @@ class AnnoyIndex(VectorIndex):
 
     def dims(self):
         """Return the dimensionality of vectors present in the index
-        
+
         Returns:
             int: Dimension count
         """
@@ -153,8 +149,7 @@ class AnnoyIndex(VectorIndex):
         return len(v0)
 
     def __repr__(self):
-        """String representation
-        """
+        """String representation"""
         idx_type = "AnnoyIndex "
         idx_name = "Unnamed" if self._name is None else self._name
         idx_info = f" [{self.count()} vectors, {self.dims()} dimensions]"
@@ -164,7 +159,7 @@ class AnnoyIndex(VectorIndex):
     @property
     def name(self):
         """Return name of the index
-        
+
         Returns:
             str: Index's name
         """
@@ -173,8 +168,7 @@ class AnnoyIndex(VectorIndex):
 
 class AnnoyIndexReader:
 
-    """Loads an Annoy index by reading its `.ann` and `.json` files
-    """
+    """Loads an Annoy index by reading its `.ann` and `.json` files"""
 
     def __init__(self, dims: int, metric: str):
         """Initialize
@@ -192,7 +186,7 @@ class AnnoyIndexReader:
             ann_file (path): Annoy index file
             json_file (path): JSON file containing labels for index vectors
             name (str, optional): Index's name
-        
+
         Returns:
             annoy.AnnoyIndex: Index
         """
@@ -202,15 +196,13 @@ class AnnoyIndexReader:
         return AnnoyIndex(index, item_resolver, name)
 
     def _read_ann(self, ann_file):
-        """Load index file
-        """
+        """Load index file"""
         index = annoy.AnnoyIndex(self._dims, self._metric)
         index.load(ann_file)
         return index
 
     def _get_items_from_json(self, json_file):
-        """Read labels
-        """
+        """Read labels"""
         with open(json_file) as file:
             items = json.load(file)
         return items

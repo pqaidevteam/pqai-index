@@ -16,12 +16,7 @@ os.environ["USE_FAISS_INDEXES"] = "1"
 os.environ["USE_ANNOY_INDEXES"] = "1"
 
 
-from core.indexes import (
-    AnnoyIndexReader,
-    AnnoyIndex,
-    FaissIndexReader,
-    FaissIndex
-)
+from core.indexes import AnnoyIndexReader, AnnoyIndex, FaissIndexReader, FaissIndex
 from core.storage import IndexStorage
 
 
@@ -88,7 +83,6 @@ class TestFaissIndexClass(unittest.TestCase):
 
 
 class TestIndexStorage(unittest.TestCase):
-
     def setUp(self):
         """The setUp function is called by the test framework at the beginning of each test.
         It creates a new instance of your application.

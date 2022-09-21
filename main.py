@@ -14,14 +14,14 @@ from fastapi import FastAPI, HTTPException
 dotenv.load_dotenv()
 
 # pylint: disable=C0411
-from core.storage import IndexStorage
+
 from operator import add
 from functools import reduce
 
 LOGGING_FORMAT = "%(levelprefix)s %(client_addr)s %(status_code)s"
 LOGGING_CONFIG["formatters"]["access"]["fmt"] = LOGGING_FORMAT
 
-
+from core.storage import IndexStorage
 
 INDEXES_FOLDER = os.environ["INDEXES_DIR"]
 assert os.path.isdir(INDEXES_FOLDER)

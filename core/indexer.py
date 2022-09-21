@@ -6,13 +6,14 @@ import json
 import numpy as np
 import faiss
 
+
 class FaissIndexCreator:
 
     """Puts a list of vectors in an FAISS index and saves it to disk"""
-    
+
     def __init__(self, factory_string: str, normalize: bool = True):
         """Initialise
-        
+
         Args:
             factory_string (str): Indexing configuration (see FAISS docs)
             normalize (bool, optional): Convert to unit vectors before indexing
@@ -20,9 +21,11 @@ class FaissIndexCreator:
         self._factory_string = factory_string
         self._normalize = normalize
 
-    def create(self, name: str, vectors: np.ndarray, labels: list, n_train: int, save_dir: str):
+    def create(
+        self, name: str, vectors: np.ndarray, labels: list, n_train: int, save_dir: str
+    ):
         """Create an index with given vectors and save to disk
-        
+
         Args:
             name (str): Index's name
             vectors (np.ndarray): 2D matrix, rows are vectors
@@ -42,7 +45,7 @@ class FaissIndexCreator:
 
         if self._normalize:
             faiss.normalize_L2(vectors)
-        
+
         index.train(vectors[:n_train])
         index.add(vectors)
         config = {
@@ -51,7 +54,7 @@ class FaissIndexCreator:
             "normalized": self.normalize,
             "dims": n_dims,
             "item_count": n_vectors,
-            "labels": labels
+            "labels": labels,
         }
         self._save(index, config, save_dir)
 
@@ -66,11 +69,13 @@ class FaissIndexCreator:
 class AnnoyIndexCreator:
 
     """Puts an array of vectors in an Annoy index and saves it to disk"""
-    
+
     def __init__(self):
         """Initialise"""
         raise NotImplementedError
 
-    def create(self, name: str, vectors: np.ndarray, labels: list, n_train: int, save_dir: str):
+    def create(
+        self, name: str, vectors: np.ndarray, labels: list, n_train: int, save_dir: str
+    ):
         """Create an index with given vectors and save to disk"""
         raise NotImplementedError

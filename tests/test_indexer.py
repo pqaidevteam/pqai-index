@@ -14,8 +14,8 @@ sys.path.append(BASE_DIR)
 
 from core.indexer import FaissIndexCreator
 
-class TestFaissIndexCreator(unittest.TestCase):
 
+class TestFaissIndexCreator(unittest.TestCase):
     def setUp(self):
         n_vectors = 20000
         n_dims = 128
@@ -34,34 +34,28 @@ class TestFaissIndexCreator(unittest.TestCase):
         self.assertFalse(os.path.exists(index_file))
         self.assertFalse(os.path.exists(config_file))
 
-        options = {
-            "normalize": True,
-            "factory_string": "OPQ16_64,HNSW32"
-        }
+        options = {"normalize": True, "factory_string": "OPQ16_64,HNSW32"}
         creator = FaissIndexCreator(**options)
         index = creator.create(
             name=self.index_name,
             vectors=self.vectors,
             labels=self.labels,
             n_train=None,
-            save_dir=TEST_DIR
+            save_dir=TEST_DIR,
         )
         self.assertTrue(os.path.exists(index_file))
         self.assertTrue(os.path.exists(config_file))
         self.cleanup()
 
     def test__error_if_labels_vectors_mismatch(self):
-        options = {
-            "normalize": True,
-            "factory_string": "OPQ16_64,HNSW32"
-        }
+        options = {"normalize": True, "factory_string": "OPQ16_64,HNSW32"}
         creator = FaissIndexCreator(**options)
         attempt = lambda: creator.create(
             name=self.index_name,
             vectors=self.vectors,
             labels=self.labels[:-1],
             n_train=None,
-            save_dir=TEST_DIR
+            save_dir=TEST_DIR,
         )
         self.assertRaises(Exception, attempt)
 
@@ -72,6 +66,7 @@ class TestFaissIndexCreator(unittest.TestCase):
             os.remove(index_file)
         if os.path.exists(config_file):
             os.remove(config_file)
+
 
 if __name__ == "__main__":
     unittest.main()
