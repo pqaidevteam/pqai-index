@@ -14,6 +14,4 @@
 git checkout main
 git pull origin main
 
-docker build . -t pqai_index:latest
-docker-compose down
 docker-compose up
