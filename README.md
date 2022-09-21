@@ -29,10 +29,10 @@ Indexes are searched by passing in a query vector. A list of most similar vector
 
 ### As docker container
 
-1. Clone this repository
-1. Create a `.env` file using `/env` template and set environment variable values
-1. Give execution permission to the deployment script: `chmod +x deploy.sh`
-1. Run deployment script: `bash deploy.sh`
+1. Install Docker in your system.
+2. Clone this repository
+3. Create a `.env` file using `/env` template and set environment variable values
+5. Then run the command: `sudo docker compose up`
 
 ## License
 
