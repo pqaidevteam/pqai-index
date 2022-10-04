@@ -1,52 +1,37 @@
 """Test for service API
-
-Attributes:
-    dotenv_file (str): Absolute path to .env file (used for reading port no.)
-    HOST (str): IP address of the host where service is running
-    PORT (str): Port no. on which the server is listening
-    PROTOCOL (str): `http` or `https`
 """
 import unittest
-import os
 import json
-import re
-import socket
+import sys
 from pathlib import Path
-import requests
 import numpy as np
-import dotenv
+from dotenv import load_dotenv
+from fastapi.testclient import TestClient
 
-dotenv_file = str((Path(__file__).parent.parent / ".env").resolve())
-dotenv.load_dotenv(dotenv_file)
+BASE_PATH = Path(__file__).parent.parent.resolve()
+ENV_PATH = BASE_PATH / ".env"
 
-PROTOCOL = "http"
-HOST = "localhost"
-PORT = os.environ["PORT"]
-assert re.match(r"^\d+$", PORT)
+load_dotenv(ENV_PATH.as_posix())
+sys.path.append(BASE_PATH.as_posix())
 
-sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-server_not_running = sock.connect_ex((HOST, int(PORT))) != 0
-if server_not_running:
-    print("Server is not running. API tests will be skipped.")
+from main import app
 
-
-@unittest.skipIf(server_not_running, "Works only when true")
 class TestAPI(unittest.TestCase):
 
-    """Check if all API routes are working as expected"""
+    def setUp(self):
+        self.client = TestClient(app)
 
-    def test_can_search(self):
-        """Check if a valid response is returned for a legit request"""
+    def test__can_search(self):
         params = {
             "mode": "vector",
             "query": json.dumps(list(np.random.random(768))),
             "n": 5,
         }
-        response = self.call_route("/search", params)
-        self.assertEqual(200, response.status_code)
-        self.assertIsInstance(response.json(), dict)
+        r = self.client.get("search", params=params)
+        self.assertEqual(200, r.status_code)
+        self.assertIsInstance(r.json(), dict)
 
-        results = response.json().get("results")
+        results = r.json().get("results")
         self.assertIsInstance(results, list)
         self.assertEqual(5, len(results))
 
@@ -56,40 +41,25 @@ class TestAPI(unittest.TestCase):
         self.assertTrue(all([isinstance(label, str) for label, _ in results]))
         self.assertTrue(all([isinstance(score, float) for _, score in results]))
 
-    def test_invalid_mode_in_request(self):
+    def test__invalid_mode_in_request(self):
         """Make sure HTTP 400 is returned when search mode is invalid"""
         params = {
             "mode": "invalid_mode",
             "query": json.dumps(list(np.random.random(768))),
             "n": 5,
         }
-        response = self.call_route("/search", params)
-        self.assertEqual(400, response.status_code)
-        self.assertEqual("Invalid search mode", response.json().get("detail"))
+        r = self.client.get("/search", params=params)
+        self.assertEqual(400, r.status_code)
+        self.assertEqual("Invalid search mode", r.json().get("detail"))
 
-    def test_invalid_json_encoded_vector_in_request(self):
+    def test__invalid_json_encoded_vector_in_request(self):
         """Make sure HTTP 400 is returned when JSON encoded query vector is not
         parsable
         """
         params = {"mode": "vector", "query": "invalid_json", "n": 5}
-        response = self.call_route("/search", params)
-        self.assertEqual(400, response.status_code)
-        self.assertEqual("Invalid JSON query", response.json().get("detail"))
-
-    def call_route(self, route, params):
-        """Make a request to given route with given parameters
-
-        Args:
-            route (str): Route, e.g. '/search'
-            params (dict): Query string parameters
-
-        Returns:
-            requests.models.Response: Response against HTTP request
-        """
-        route = route.lstrip("/")
-        url = f"{PROTOCOL}://{HOST}:{PORT}/{route}"
-        response = requests.get(url, params)
-        return response
+        r = self.client.get("/search", params=params)
+        self.assertEqual(400, r.status_code)
+        self.assertEqual("Invalid JSON query", r.json().get("detail"))
 
 
 if __name__ == "__main__":
