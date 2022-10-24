@@ -9,5 +9,8 @@ venv/
 ENV/
 env.bak/
 venv.bak/
-/indexes
+/indexes/*
+!indexes/README.md
 docker-compose.yml
+
+/.vscode
