@@ -14,3 +14,4 @@ venv.bak/
 docker-compose.yml
 
 /.vscode
+/adhoc

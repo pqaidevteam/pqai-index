@@ -24,7 +24,7 @@ LOGGING_CONFIG["formatters"]["access"]["fmt"] = LOGGING_FORMAT
 from core.storage import IndexStorage
 
 INDEXES_FOLDER = os.environ["INDEXES_DIR"]
-assert os.path.isdir(INDEXES_FOLDER)
+assert os.path.isdir(INDEXES_FOLDER), f"Cannot find indexes directory: {INDEXES_FOLDER}"
 INDEX_DIR = IndexStorage(INDEXES_FOLDER)
 INDEXES = reduce(add, [INDEX_DIR.get(name) for name in INDEX_DIR.available()])
 
