@@ -1,19 +1,18 @@
-version: '3.2'
+version: '3'
 
 services:
-  pqai_indexer_api:
-    container_name: dev_pqai_indexer
+  pqai_index:
+    image: pqai_index
+    container_name: pqai_index
     build: .
-    command: bash -c "pip install --no-cache-dir --upgrade -r /app/requirements.txt && uvicorn main:app --host 0.0.0.0 --port 80"
     restart: always
-    ports: 
-      - ${PORT}:80
     volumes:
       - type: bind
-        source: ./assets
-        target: /app/assets
+        source: ./indexes
+        target: /app/indexes
+    ports:
+      - ${PORT}:80
     environment:
-      - PORT=${PORT}
-      - INDEXES_DIR=${INDEXES_DIR}
       - USE_FAISS_INDEXES=${USE_FAISS_INDEXES}
       - USE_ANNOY_INDEXES=${USE_ANNOY_INDEXES}
+      - PORT=${PORT}

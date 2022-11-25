@@ -6,6 +6,7 @@ Attributes:
 
 import os
 import json
+from pathlib import Path
 import dotenv
 import uvicorn
 from uvicorn.config import LOGGING_CONFIG
@@ -23,7 +24,8 @@ LOGGING_CONFIG["formatters"]["access"]["fmt"] = LOGGING_FORMAT
 
 from core.storage import IndexStorage
 
-INDEXES_FOLDER = os.environ["INDEXES_DIR"]
+APP_DIR = Path(__file__).parent
+INDEXES_FOLDER = (APP_DIR / "indexes").resolve()
 assert os.path.isdir(INDEXES_FOLDER), f"Cannot find indexes directory: {INDEXES_FOLDER}"
 INDEX_DIR = IndexStorage(INDEXES_FOLDER)
 INDEXES = reduce(add, [INDEX_DIR.get(name) for name in INDEX_DIR.available()])
@@ -32,8 +34,6 @@ app = FastAPI()
 
 
 @app.get("/search")
-
-# pylint: disable=C0103
 async def search(mode: str, query: str, n: int):
     """Converts the query into vector and returns top n similar indexes"""
 
