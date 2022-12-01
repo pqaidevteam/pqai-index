@@ -10,6 +10,8 @@ Service for searching vector indexes.
 
 Indexes are searched by passing in a query vector. A list of most similar vectors present in the index are then found and their labels and similarities (or distances) are returned in the response.
 
+For more detailed information, please refer to [PQAI Wiki](https://github.com/pqaidevteam/pqai/wiki/pqai-index).
+
 ## Routes
 
 | Method | Endpoint  | Comments                                      |
