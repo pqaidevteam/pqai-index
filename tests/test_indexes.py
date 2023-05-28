@@ -1,4 +1,4 @@
-"""Tests for the indexer module
+"""Tests for the indexes module
 """
 import unittest
 import os
@@ -26,9 +26,8 @@ class TestAnnoyIndexReader(unittest.TestCase):
     def test_read_annoy_index(self):
         """Can read an Annoy index from disk?"""
         ann_file = f"{test_index_dir}/Y02T.ttl.ann"
-        json_file = f"{test_index_dir}/Y02T.ttl.items.json"
-        reader = AnnoyIndexReader(768, "angular")
-        index = reader.read_from_files(ann_file, json_file)
+        json_file = f"{test_index_dir}/Y02T.ttl.metadata.json"
+        index = AnnoyIndexReader().read_from_files(ann_file, json_file)
         self.assertIsInstance(index, AnnoyIndex)
 
 
@@ -38,9 +37,8 @@ class TestAnnoyIndexClass(unittest.TestCase):
     def setUp(self):
         """Set up an index to use for testing"""
         ann_file = f"{test_index_dir}/Y02T.ttl.ann"
-        json_file = f"{test_index_dir}/Y02T.ttl.items.json"
-        reader = AnnoyIndexReader(768, "angular")
-        self.index = reader.read_from_files(ann_file, json_file)
+        json_file = f"{test_index_dir}/Y02T.ttl.metadata.json"
+        self.index = AnnoyIndexReader().read_from_files(ann_file, json_file)
 
     def test_run_query(self):
         """Can it find similar vector for a given query vector?"""
@@ -57,7 +55,7 @@ class TestFaissIndexReaderClass(unittest.TestCase):
     def test_read_from_files(self):
         """Can read an index from `.faiss` and `.json` files?"""
         index_file = f"{test_index_dir}/B68G.abs.faiss"
-        json_file = f"{test_index_dir}/B68G.abs.items.json"
+        json_file = f"{test_index_dir}/B68G.abs.metadata.json"
         r = FaissIndexReader()
         index = r.read_from_files(index_file, json_file)
         self.assertIsInstance(index, FaissIndex)
@@ -69,7 +67,7 @@ class TestFaissIndexClass(unittest.TestCase):
     def setUp(self):
         """The setUp function is called before each test function is run."""
         index_file = f"{test_index_dir}/B68G.abs.faiss"
-        json_file = f"{test_index_dir}/B68G.abs.items.json"
+        json_file = f"{test_index_dir}/B68G.abs.metadata.json"
         r = FaissIndexReader()
         self.index = r.read_from_files(index_file, json_file)
 

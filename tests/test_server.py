@@ -24,7 +24,7 @@ class TestAPI(unittest.TestCase):
     def test__can_search(self):
         params = {
             "mode": "vector",
-            "query": json.dumps(list(np.random.random(768))),
+            "query": json.dumps(list(np.random.random(384))),
             "n": 5,
         }
         r = self.client.get("search", params=params)

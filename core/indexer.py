@@ -62,7 +62,7 @@ class FaissIndexCreator:
         """Save index to disk"""
         name = config["name"]
         faiss.write_index(index, f"{save_dir}/{name}.faiss")
-        with open(f"{save_dir}/{name}.config.json", "w") as fp:
+        with open(f"{save_dir}/{name}.metadata.json", "w") as fp:
             json.dump(config, fp)
 
 

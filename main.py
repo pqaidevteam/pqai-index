@@ -8,27 +8,24 @@ import os
 import json
 from pathlib import Path
 import dotenv
+from operator import add
+from functools import reduce
 import uvicorn
 from uvicorn.config import LOGGING_CONFIG
 from fastapi import FastAPI, HTTPException
 
 dotenv.load_dotenv()
 
-# pylint: disable=C0411
-
-from operator import add
-from functools import reduce
+from core.storage import IndexStorage
 
 LOGGING_FORMAT = "%(levelprefix)s %(client_addr)s %(status_code)s"
 LOGGING_CONFIG["formatters"]["access"]["fmt"] = LOGGING_FORMAT
 
-from core.storage import IndexStorage
-
 APP_DIR = Path(__file__).parent
 INDEXES_FOLDER = (APP_DIR / "indexes").resolve()
 assert os.path.isdir(INDEXES_FOLDER), f"Cannot find indexes directory: {INDEXES_FOLDER}"
-INDEX_DIR = IndexStorage(INDEXES_FOLDER)
-INDEXES = reduce(add, [INDEX_DIR.get(name) for name in INDEX_DIR.available()])
+index_storage = IndexStorage(INDEXES_FOLDER)
+indexes = reduce(add, [index_storage.get(name) for name in index_storage.available()])
 
 app = FastAPI()
 
@@ -40,7 +37,7 @@ async def search(mode: str, query: str, n: int):
     if mode == "vector":
         try:
             qvec = json.loads(query)
-            results = reduce(add, [idx.search(qvec, n) for idx in INDEXES])
+            results = reduce(add, [idx.search(qvec, n) for idx in indexes])
             results.sort(key=lambda r: r[1])
             return {"query": qvec, "results": results[:n]}
         except json.JSONDecodeError:

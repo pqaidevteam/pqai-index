@@ -16,12 +16,10 @@ class IndexStorage:
 
     Attributes:
         cache (dict): In-memory store of indexes loaded from the disk
-        dims (int): Dimensionality of the vectors
         metric (str): Metric used for similarity, e.g., cosine proximity
     """
 
     cache = {}
-    dims = 768
     metric = "angular"
 
     def __init__(self, folder):
@@ -71,11 +69,11 @@ class IndexStorage:
         """Load an index from disk"""
         print(f"Loading vector index: {index_id}")
         index_file = self._get_index_file_path(index_id)
-        json_file = f"{self._folder}/{index_id}.items.json"
+        json_file = f"{self._folder}/{index_id}.metadata.json"
         if index_file.endswith("faiss"):
             reader = FaissIndexReader()
         else:
-            reader = AnnoyIndexReader(self.dims, self.metric)
+            reader = AnnoyIndexReader()
         index = reader.read_from_files(index_file, json_file, name=index_id)
         self._cache_index(index_id, index)
         print(

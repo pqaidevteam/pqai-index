@@ -38,7 +38,6 @@ class FaissIndex(VectorIndex):
         self._id = name
         self._index = index
         self._index2label = resolver_fn
-        self._labels = None
         self._dims = None
 
     def search(self, qvec, n):
@@ -80,15 +79,15 @@ class FaissIndexReader:
             FaissIndex: Index object
         """
         index = faiss.read_index(index_file)
-        items = self._get_items_from_json(json_file)
-        item_resolver = items.__getitem__
+        metadata = self._read_json(json_file)
+        labels = metadata["labels"]
+        item_resolver = labels.__getitem__
         return FaissIndex(index, item_resolver, name)
 
-    def _get_items_from_json(self, json_file):
-        """Read labels from json file"""
+    def _read_json(self, json_file):
+        """Read metadata from json file"""
         with open(json_file) as fp:
-            items = json.load(fp)
-        return items
+            return json.load(fp)
 
 
 class AnnoyIndex(VectorIndex):
@@ -170,39 +169,34 @@ class AnnoyIndexReader:
 
     """Loads an Annoy index by reading its `.ann` and `.json` files"""
 
-    def __init__(self, dims: int, metric: str):
+    def __init__(self):
         """Initialize
-
-        Args:
-            dims: Dimension of stored vectors, e.g., 32
-            metric: Distance metric, e.g., 'cosine'
         """
-        self._dims = dims
-        self._metric = metric
 
     def read_from_files(self, ann_file: str, json_file: str, name=None):
         """
         Args:
             ann_file (path): Annoy index file
-            json_file (path): JSON file containing labels for index vectors
+            json_file (path): Contains metadata (including labels) for indexed vectors
             name (str, optional): Index's name
 
         Returns:
             annoy.AnnoyIndex: Index
         """
-        index = self._read_ann(ann_file)
-        items = self._get_items_from_json(json_file)
-        item_resolver = items.__getitem__
+        metadata = self._read_json(json_file)
+        item_resolver = metadata["labels"].__getitem__
+        dims = metadata["dims"]
+        metric = metadata["metric"]
+        index = self._read_ann(ann_file, dims=dims, metric=metric)
         return AnnoyIndex(index, item_resolver, name)
 
-    def _read_ann(self, ann_file):
+    def _read_ann(self, ann_file: str, dims: int, metric: str):
         """Load index file"""
-        index = annoy.AnnoyIndex(self._dims, self._metric)
+        index = annoy.AnnoyIndex(dims, metric)
         index.load(ann_file)
         return index
 
-    def _get_items_from_json(self, json_file):
-        """Read labels"""
+    def _read_json(self, json_file: str):
+        """Read metdata file"""
         with open(json_file) as file:
-            items = json.load(file)
-        return items
+            return json.load(file)
