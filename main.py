@@ -13,6 +13,8 @@ from functools import reduce
 import uvicorn
 from uvicorn.config import LOGGING_CONFIG
 from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+from typing import Optional
 
 dotenv.load_dotenv()
 
@@ -29,15 +31,18 @@ indexes = reduce(add, [index_storage.get(name) for name in index_storage.availab
 
 app = FastAPI()
 
-
 @app.get("/search")
-async def search(mode: str, query: str, n: int):
+async def search(mode: str, query: str, n: Optional[int] = 10, index: Optional[str] = None):
     """Converts the query into vector and returns top n similar indexes"""
 
     if mode == "vector":
         try:
             qvec = json.loads(query)
-            results = reduce(add, [idx.search(qvec, n) for idx in indexes])
+            if index is None:
+                target_indexes = indexes
+            else:
+                target_indexes = index_storage.get(index)
+            results = reduce(add, [idx.search(qvec, n) for idx in target_indexes])
             results.sort(key=lambda r: r[1])
             return {"query": qvec, "results": results[:n]}
         except json.JSONDecodeError:
